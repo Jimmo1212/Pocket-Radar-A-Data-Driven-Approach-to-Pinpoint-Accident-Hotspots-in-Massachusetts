@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predicted Accident Hotspots</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+
+    <style>
+        body { display: flex; flex-direction: row; height: 100vh; margin: 0; }
+        #feature-panel {
+            width: 25%; background: #f4f4f4; padding: 15px;
+            overflow-y: auto; box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        #map-container { flex: 1; }
+        #map { height: 100vh; width: 100%; }
+        .filter-container { padding: 10px; background: white; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <!-- Feature Info Panel -->
+    <div id="feature-panel">
+        <h2>User Input Features</h2>
+        <ul>
+            <li><b>Hour:</b> {{ user_inputs["Hour"] }}</li>
+            <li><b>Month:</b> {{ user_inputs["Month"] }}</li>
+            <li><b>Week:</b> {{ user_inputs["Week"] }}</li>
+            <li><b>Weather:</b> {{ user_inputs["Weather_Condition"] }}</li>
+            <li><b>Temperature:</b> {{ user_inputs["Temperature(F)"] }} °F</li>
+            <li><b>Humidity:</b> {{ user_inputs["Humidity(%)"] }}%</li>
+            <li><b>Pressure:</b> {{ user_inputs["Pressure(in)"] }} in</li>
+            <li><b>Visibility:</b> {{ user_inputs["Visibility(mi)"] }} mi</li>
+            <li><b>Wind Speed:</b> {{ user_inputs["Wind_Speed(mph)"] }} mph</li>
+            <li><b>Wind Direction:</b> {{ user_inputs["Wind_Condition"] }}</li>
+        </ul>
+
+        <h3>Toggle Severity Display:</h3>
+        <label><input type="checkbox" id="filter-severity-1" checked> Show Low Severity (1) - Yellow</label><br>
+        <label><input type="checkbox" id="filter-severity-2" checked> Show Moderate Severity (2) - Orange</label><br>
+        <label><input type="checkbox" id="filter-severity-3" checked> Show High Severity (3) - Red</label><br>
+        <label><input type="checkbox" id="filter-severity-4" checked> Show Very High Severity (4) - Dark Red</label><br>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <script>
+        var map = L.map('map').setView([42.3601, -71.0589], 8);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var severityColors = {
+            1: "yellow",
+            2: "orange",
+            3: "red",
+            4: "darkred"
+        };
+
+        var accidentData = JSON.parse('{{ accident_data | safe }}');
+
+        var markers = {1: [], 2: [], 3: [], 4: []};
+
+        // Add markers for each severity
+        Object.keys(accidentData).forEach(function(severity) {
+            accidentData[severity].forEach(function(p) {
+                var marker = L.circleMarker([p.latitude, p.longitude], {
+                    radius: 6,
+                    color: severityColors[severity],
+                    fillColor: severityColors[severity],
+                    fillOpacity: 0.7
+                }).bindPopup("Severity Level: " + severity);
+
+                markers[severity].push(marker);
+            });
+        });
+
+        // Ensure Severity 1 is always at the bottom
+        function updateMap() {
+            [2, 3, 4].forEach(function(severity) {
+                var isChecked = document.getElementById("filter-severity-" + severity).checked;
+                markers[severity].forEach(function(marker) {
+                    if (isChecked) {
+                        map.addLayer(marker);
+                    } else {
+                        map.removeLayer(marker);
+                    }
+                });
+            });
+
+            // Ensure Severity 1 is always at the bottom
+            var severity1Checked = document.getElementById("filter-severity-1").checked;
+            markers[1].forEach(function(marker) {
+                if (severity1Checked) {
+                    marker.addTo(map).bringToBack();
+                } else {
+                    map.removeLayer(marker);
+                }
+            });
+        }
+
+        document.getElementById("filter-severity-1").addEventListener("change", updateMap);
+        document.getElementById("filter-severity-2").addEventListener("change", updateMap);
+        document.getElementById("filter-severity-3").addEventListener("change", updateMap);
+        document.getElementById("filter-severity-4").addEventListener("change", updateMap);
+
+        // Initially show all markers and bring severity 1 to the bottom
+        updateMap();
+    </script>
+
+</body>
+</html>

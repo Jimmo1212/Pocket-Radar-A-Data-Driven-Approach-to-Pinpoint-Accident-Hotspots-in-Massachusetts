@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Accident Prediction</title>
+</head>
+<body>
+    <h1>Accident Severity Prediction</h1>
+    <form action="/predict" method="post">
+        <label>Hour:</label>
+        <input type="number" name="Hour" required><br>
+
+        <label>Month:</label>
+        <input type="number" name="Month"><br>
+
+        <label>Week:</label>
+        <input type="number" name="Week"><br>
+
+        <label>Weather Condition:</label>
+        <select name="Weather_Condition">
+            <option value="Rain">Rain</option>
+            <option value="Clear">Clear</option>
+            <option value="Cloudy">Cloudy</option>
+            <option value="Snow">Snow</option>
+        </select><br>
+
+        <label>Temperature (F):</label>
+        <input type="number" name="Temperature" required><br>
+
+        <label>Humidity (%):</label>
+        <input type="number" name="Humidity" required><br>
+
+        <label>Pressure (in):</label>
+        <input type="number" name="Pressure" required><br>
+
+        <label>Visibility (mi):</label>
+        <input type="number" name="Visibility" required><br>
+
+        <label>Wind Speed (mph):</label>
+        <input type="number" name="Wind_Speed" required><br>
+
+        <label>Wind Condition:</label>
+        <select name="Wind_Condition">
+            <option value="Wind_N">North</option>
+            <option value="Wind_S">South</option>
+            <option value="Wind_E">East</option>
+            <option value="Wind_W">West</option>
+        </select><br>
+
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>
